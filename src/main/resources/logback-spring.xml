@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <property name="APP_NAME" value="cloudops"/>
+    <property name="LOG_PATH" value="${user.home}/logs/${APP_NAME}"/>
+    <property name="ROOT_FILE" value="${LOG_PATH}/root.log"/>
+    <property name="WEB_FILE" value="${LOG_PATH}/web.log"/>
+    <property name="POP_FILE" value="${LOG_PATH}/pop.log"/>
+    <property name="TEST_FILE" value="${LOG_PATH}/test.log"/>
+
+    <property name="ROOT_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %level %m%n %wEx"/>
+    <property name="WEB_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %level [%X{requestId}] %m%n %wEx"/>
+    <property name="POP_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %level [%X{requestId}] %m%n %wEx"/>
+    <property name="TEST_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss} %level %m%n %wEx"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${ROOT_LOG_PATTERN}</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="ROOT" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${ROOT_FILE}</file>
+        <encoder>
+            <pattern>${ROOT_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${ROOT_FILE}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <maxFileSize>50MB</maxFileSize>
+            <totalSizeCap>20GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="WEB" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${WEB_FILE}</file>
+        <encoder>
+            <pattern>${WEB_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${WEB_FILE}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <maxFileSize>20MB</maxFileSize>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="POP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${POP_FILE}</file>
+        <encoder>
+            <pattern>${POP_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${POP_FILE}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <maxFileSize>20MB</maxFileSize>
+            <totalSizeCap>500GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <appender name="TEST" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${TEST_FILE}</file>
+        <encoder>
+            <pattern>${TEST_LOG_PATTERN}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${TEST_FILE}.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+            <maxFileSize>20MB</maxFileSize>
+            <totalSizeCap>200GB</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+
+    <logger name="main" additivity="false" level="INFO"/>
+
+    <logger name="org.quartz" additivity="false" level="INFO"/>
+
+    <logger name="org.apache.http" additivity="false" level="WARN" />
+
+    <logger name="org.springframework.data" additivity="false" level="INFO"/>
+
+    <logger name="org.springframework.test" additivity="false" level="INFO">
+        <appender-ref ref="ROOT"/>
+    </logger>
+
+    <logger name="com.aliyuncs.client" additivity="false">
+        <appender-ref ref="POP"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="ROOT"/>
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>

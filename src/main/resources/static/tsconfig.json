@@ -1,0 +1,26 @@
+{
+  "include": [
+    "./index.tsx",
+    "./components/**/*"
+  ],
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "strictPropertyInitialization": false,
+    "target": "es6",
+    "module": "CommonJS",
+    "allowJs": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
+  }
+}

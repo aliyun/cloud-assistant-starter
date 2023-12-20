@@ -1,0 +1,29 @@
+[
+    {
+        "key": "show-tasks",
+        "name": "获取进程列表",
+        "tips":"获取实例的运行进程列表，并存储到数据库中。",
+        "scripts": {
+            "linux": "ps -au",
+            "windows": "tasklist"
+        }
+    },
+    {
+        "key": "show-disks",
+        "name": "获取磁盘大小",
+        "tips": "获取实例的磁盘空间使用信息，并存储到数据库中。",
+        "scripts": {
+            "linux": "df -h",
+            "windows": "wmic logicaldisk get Caption,FreeSpace,Size,VolumeName,FileSystem"
+        }
+    },
+    {
+        "key": "show-system",
+        "name": "获取系统信息",
+        "tips": "获取实例的操作系统信息，并存储到数据库中。",
+        "scripts": {
+            "linux": "lsb_release -a",
+            "windows": "systeminfo"
+        }
+    }
+]
