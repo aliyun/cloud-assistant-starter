@@ -74,7 +74,9 @@ spring.datasource.driver   = org.h2.Driver
 
 编译命令：
 ```shell
-npm install && webpack
+cd src/main/resources/static
+npm install
+webpack
 ```
 
 5. [**必选**]  后端编译
@@ -93,6 +95,8 @@ mvn spring-boot:run
 
 #### 查看示例
 启动项目后，可以通过 http://localhost:8888 查看本演示程序。
+
+预览: ![screenshot](https://github.com/aliyun/cloud-assistant-starter/blob/master/screenshot.webp "screenshot")
 
 #### [可选]前后端分离
 你可以分别启动后端与前端

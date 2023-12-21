@@ -72,11 +72,11 @@ module.exports = {
         "xterm": "XTerm"
     },
     plugins: [
-        new CopyPlugin({
-            patterns: [
-                {from: "./dist/", to: "../../../../../target/classes/static/dist/"}
-            ],
-        }),
+        // new CopyPlugin({
+        //     patterns: [
+        //         {from: "./dist/", to: "../../../../../target/classes/static/dist/"}
+        //     ],
+        // }),
         new webpack.ProvidePlugin({
             Buffer: ['buffer', 'Buffer'],
         }),
