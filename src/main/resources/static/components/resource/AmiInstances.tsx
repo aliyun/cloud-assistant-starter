@@ -116,7 +116,7 @@ export default class AmiInstances extends AcsResources<AmiInstancesState> {
                                 </span>
                             )}>
                                 <Button disabled={!online} style={{color: color}} size="small" target="_blank"
-                                        href={`/session/axt?productId=swas&regionId=${regionId}&instanceId=${vm.instanceId}`}
+                                        href={`/session/axt?productId=ecs&regionId=${regionId}&instanceId=${vm.instanceId}`}
                                 >
                                     会话连接
                                 </Button>
