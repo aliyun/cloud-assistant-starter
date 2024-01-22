@@ -1,17 +1,17 @@
-import React from "react";
-import axios from "axios";
-import {Button, Dropdown, Space, Tooltip} from 'antd';
-import DownOutlined from "@ant-design/icons/DownOutlined"
 import AcsResources, {ABOUT_SESSION_MANAGER, AcsResourcesState} from "./AcsResources";
+import axios from "axios";
+import {Button, Dropdown, Space, Tooltip} from "antd";
+import DownOutlined from "@ant-design/icons/DownOutlined";
+import React from "react";
 
-interface EcsInstancesState extends AcsResourcesState {
+interface SwasInstancesState extends AcsResourcesState {
     instances: any[];
 }
 
 /**
  * 云服务器列表
  */
-export default class EcsInstances extends AcsResources<EcsInstancesState> {
+export default class SwasInstances extends AcsResources<SwasInstancesState> {
 
     assistants: Map<string, { cloudAssistantStatus: string, cloudAssistantVersion: string }> = new Map();
 
@@ -28,16 +28,17 @@ export default class EcsInstances extends AcsResources<EcsInstancesState> {
         }
     }
 
+
     productCode(): string {
-        return "ecs";
+        return "swas";
     }
 
     resourceName(): string {
-        return "云服务器";
+        return "轻量主机";
     }
 
     loadResources(regionId: string, pageIndex: number = 1, pageSize: number = 20) {
-        const url = `/api/ecs/regions/${regionId}/instances?pageIndex=${pageIndex}&pageSize=${pageSize}`
+        const url = `/api/swas/regions/${regionId}/instances?pageIndex=${pageIndex}&pageSize=${pageSize}`
         axios.get(url).then(response => {
             // noinspection TypeScriptValidateTypes
             this.setState({
@@ -50,9 +51,9 @@ export default class EcsInstances extends AcsResources<EcsInstancesState> {
         }).then(instances => {
             if (instances.length == 0) return
             const query = instances.map((vm: any) => 'instanceId=' + vm.instanceId).join("&")
-            const url = `/api/ecs/regions/${regionId}/assistants?${query}`;
+            const url = `/api/swas/regions/${regionId}/assistants?${query}`;
             axios.get(url).then(result => {
-                result.data.instanceCloudAssistantStatusSet.forEach((status: any) => {
+                result.data.cloudAssistantStatus.forEach((status: any) => {
                     this.assistants.set(status.instanceId, status)
                 })
                 // noinspection TypeScriptValidateTypes
@@ -76,10 +77,10 @@ export default class EcsInstances extends AcsResources<EcsInstancesState> {
                 }
             },
             {
-                key: "ostype", title: "系统类型", dataIndex: "ostype", render: (type: string, vm: any) => {
+                key: "imageId", title: "系统类型", dataIndex: "imageId", render: (type: string, vm: any) => {
                     return (
-                        <Tooltip placement="left" title={vm["osname"] ?? vm["osnameEn"]}>
-                            <span>{type}</span>
+                        <Tooltip placement="left" title={vm.image.imageName}>
+                            <span>{vm.image.osType}</span>
                         </Tooltip>
                     )
                 }
@@ -91,12 +92,12 @@ export default class EcsInstances extends AcsResources<EcsInstancesState> {
                 }
             },
             {
-                key: "instanceType", title: "实例类型", dataIndex: "instanceType", render: (spec: string, vm: any) => {
+                key: "instanceType", title: "实例类型", dataIndex: "instanceType", render: (spec: any, vm: any) => {
                     return (
                         <div>
                             <div>
-                                <span style={{fontWeight: "bold"}}>{vm.cpu}</span>核(vCPU) &nbsp;
-                                <span style={{fontWeight: "bold"}}>{vm.memory / 1024}</span>GiB
+                                <span style={{fontWeight: "bold"}}>{vm.resourceSpec.cpu}</span>核(vCPU) &nbsp;
+                                <span style={{fontWeight: "bold"}}>{vm.resourceSpec.memory / 1024}</span>GiB
                             </div>
                             <div>{spec}</div>
                         </div>
@@ -104,20 +105,25 @@ export default class EcsInstances extends AcsResources<EcsInstancesState> {
                 }
             },
             {
-                key: "privateIp", title: "私网IP", dataIndex: "networkInterfaces", render: (enis: any[], vm: any) => {
+                key: "innerIpAddress",
+                title: "私网IP",
+                dataIndex: "innerIpAddress",
+                render: (address: string, vm: any) => {
                     return (
                         <div>
-                            {enis.map(eni => <div key={eni.networkInterfaceId}><a>{eni.primaryIpAddress}</a></div>)}
+                            <div key={address}><a>{address}</a></div>
                         </div>
                     )
                 }
             },
             {
-                key: "publicIp", title: "公网IP", dataIndex: "publicIpAddress", render: (address: string[], vm: any) => {
+                key: "publicIpAddress",
+                title: "公网IP",
+                dataIndex: "publicIpAddress",
+                render: (address: string, vm: any) => {
                     return (
                         <div>
-                            <div>{address.map((ip: string) => <div key={ip}><a>{ip}</a></div>)}</div>
-                            <div hidden={!vm.eipAddress.ipAddress}><a>{vm.eipAddress.ipAddress}</a>(弹性IP)</div>
+                            <div key={address}><a>{address}</a></div>
                         </div>
                     )
                 }
@@ -138,14 +144,10 @@ export default class EcsInstances extends AcsResources<EcsInstancesState> {
                     if (!status) {
                         return <span>...</span>
                     } else {
-                        if ("true" == status.cloudAssistantStatus) {
-                            return <Tooltip title={`版本：${status.cloudAssistantVersion}`}><a
-                                style={{color: "green"}}>在线</a></Tooltip>
-                        } else if (status.cloudAssistantVersion) {
-                            return <Tooltip title={`版本：${status.cloudAssistantVersion}`}><a
-                                style={{color: "orange"}}>离线</a></Tooltip>
+                        if (true == status["status"]) {
+                            return <a style={{color: "green"}}>在线</a>
                         } else {
-                            return <a style={{color: "gray"}}>未安装</a>
+                            return <a style={{color: "orange"}}>离线</a>
                         }
                     }
                 }
@@ -154,7 +156,7 @@ export default class EcsInstances extends AcsResources<EcsInstancesState> {
                 key: "actions", title: "操作", dataIndex: "actions", render: (_: any, vm: any) => {
                     const regionId = this.state.regionId;
                     const status = this.assistants.get(vm.instanceId)
-                    const enable = status?.cloudAssistantStatus == "true"
+                    const enable = status && status["status"] == true
                     const color = enable ? "green" : "gray";
                     return (
                         <Space style={{minWidth: 120}}>
@@ -164,21 +166,21 @@ export default class EcsInstances extends AcsResources<EcsInstancesState> {
                                 </span>
                             )}>
                                 <Button disabled={!enable} style={{color: color}} size="small" target="_blank"
-                                        href={`/session/axt?productId=ecs&regionId=${regionId}&instanceId=${vm.instanceId}`}
+                                        href={`/session/axt?productId=swas&regionId=${regionId}&instanceId=${vm.instanceId}`}
                                 >
                                     会话连接
                                 </Button>
                             </Tooltip>
-                            <Dropdown menu={{
-                                items: this.getTaskMenus(!enable),
-                                onClick: (args) => {
-                                    this.runCommand("ecs", vm, args)
-                                }
-                            }}>
-                                <a onClick={e => e.preventDefault()}>
-                                    <Space>更多操作<DownOutlined/></Space>
-                                </a>
-                            </Dropdown>
+                            {/*<Dropdown menu={{*/}
+                            {/*    items: this.getTaskMenus(!enable),*/}
+                            {/*    onClick: (args) => {*/}
+                            {/*        this.runCommand("swas", vm, args)*/}
+                            {/*    }*/}
+                            {/*}}>*/}
+                            {/*    <a onClick={e => e.preventDefault()}>*/}
+                            {/*        <Space>更多操作<DownOutlined/></Space>*/}
+                            {/*    </a>*/}
+                            {/*</Dropdown>*/}
                         </Space>
                     )
                 }

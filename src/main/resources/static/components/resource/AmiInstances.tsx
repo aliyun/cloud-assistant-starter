@@ -116,7 +116,7 @@ export default class AmiInstances extends AcsResources<AmiInstancesState> {
                                 </span>
                             )}>
                                 <Button disabled={!online} style={{color: color}} size="small" target="_blank"
-                                        href={`/session/axt?regionId=${regionId}&instanceId=${vm.instanceId}`}
+                                        href={`/session/axt?productId=swas&regionId=${regionId}&instanceId=${vm.instanceId}`}
                                 >
                                     会话连接
                                 </Button>
@@ -124,7 +124,7 @@ export default class AmiInstances extends AcsResources<AmiInstancesState> {
                             <Dropdown menu={{
                                 items: this.getTaskMenus(!online),
                                 onClick: (args) => {
-                                    this.runCommand(vm, args)
+                                    this.runCommand("ecs", vm, args)
                                 }
                             }}>
                                 <a onClick={e => e.preventDefault()}>

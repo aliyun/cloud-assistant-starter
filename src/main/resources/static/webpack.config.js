@@ -21,7 +21,7 @@ module.exports = {
         },
         proxy: [
             {
-                context: ["/api", "/ecs", "/ami", "/task", "/session"],
+                context: ["/api", "/ecs", "/ami", "/swas", "/task", "/session"],
                 target: "http://localhost:8888"
             }
         ],

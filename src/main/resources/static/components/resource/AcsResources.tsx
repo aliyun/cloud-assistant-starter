@@ -63,17 +63,20 @@ export default abstract class AcsResources<S extends AcsResourcesState> extends 
         })
     }
 
-    runCommand = (vm: { instanceId: string }, args: { key: string }) => {
+    runCommand = (productId: string, vm: { instanceId: string }, args: { key: string }) => {
         let osType = "linux";
-        if (vm.instanceId.startsWith("mi")) {
-            if (vm.osType?.includes("Windows")) {
-                osType = "windows"
-            }
-        } else {
-            if (vm.ostype?.includes("windows")) {
-                osType = "windows"
+        if (productId == "ecs") {
+            if (vm.instanceId.startsWith("mi")) {
+                if (vm.osType?.includes("Windows")) {
+                    osType = "windows"
+                }
+            } else {
+                if (vm.ostype?.includes("windows")) {
+                    osType = "windows"
+                }
             }
         }
+
         const menu: TaskMenu = commands.filter(cmd => cmd.key == args.key)[0]
         const runCommandRequest = {
             regionId: this.state.regionId,
@@ -90,7 +93,7 @@ export default abstract class AcsResources<S extends AcsResourcesState> extends 
                 }
             ]
         }
-        const url = `/api/ecs/tasks/${this.state.regionId}`
+        const url = `/api/${productId}/tasks/${this.state.regionId}`
         axios.put(url, runCommandRequest).then(response => {
             notification.open({
                 message: `已创建任务：${response.data.invokeId}`,
