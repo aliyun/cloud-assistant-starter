@@ -21,7 +21,8 @@ type Status = "prepare" | "opening" | "opened" | "aborted" | "closing" | "closed
 
 // 云助手 SessionManager 会话连接
 export default class AxtSession extends React.Component<AxtSessionProps, AxtSessionState> {
-    private readonly regionId: string;
+    private readonly productId: string
+    private readonly regionId: string
     private readonly instanceId: string
     private container: HTMLElement | null = null
     private socketUrl: string | undefined = undefined
@@ -60,6 +61,7 @@ export default class AxtSession extends React.Component<AxtSessionProps, AxtSess
     constructor(props: Readonly<AxtSessionProps> | AxtSessionProps) {
         super(props);
         const search = new URLSearchParams(window.location.search)
+        this.productId = search.get("productId") ?? "ecs"
         this.regionId = search.get("regionId") ?? ""
         this.instanceId = search.get("instanceId") ?? ""
         this.state = {
@@ -140,7 +142,7 @@ export default class AxtSession extends React.Component<AxtSessionProps, AxtSess
             msgType: type,
             version: "1.02",
             channelId: this.channelId!,
-            instanceId: this.instanceId,
+            instanceId: "", // this.instanceId,
             timestamp: current,
             inputSeq: this.inputSeq,
             outputSeq: this.outputSeq,
@@ -468,14 +470,22 @@ export default class AxtSession extends React.Component<AxtSessionProps, AxtSess
     }
 
     startTerminalSession = () => {
-        const url = `/api/ecs/regions/${this.regionId}/assistants?instanceId=${this.instanceId}`
+        const url = `/api/${this.productId}/regions/${this.regionId}/assistants?instanceId=${this.instanceId}`
         axios.get(url).then(response => {
-            const status = response.data.instanceCloudAssistantStatusSet[0];
-            if (!status.supportSessionManager) {
-                this.terminal.write(`[x] 此实例的云助手(${status.cloudAssistantVersion})不支持会话管理.\r\n`)
-                return
+            if (this.productId == "ecs") {
+                const status = response.data.instanceCloudAssistantStatusSet[0];
+                if (!status || !status.supportSessionManager) {
+                    this.terminal.write(`[x] 此实例的云助手(${status.cloudAssistantVersion})不支持会话管理.\r\n`)
+                    return
+                }
+            } else if (this.productId == "swas") {
+                const status = response.data.cloudAssistantStatus[0];
+                if (!status || !status.status) {
+                    this.terminal.write(`[x] 此实例的云助手(${status.cloudAssistantVersion})不支持会话管理.\r\n`)
+                    return
+                }
             }
-            const url = `/api/ecs/sessions/${this.regionId}/instances/${this.instanceId}`
+            const url = `/api/${this.productId}/sessions/${this.regionId}/instances/${this.instanceId}`
             axios.put(url).then(session => { // ecs:StartTerminalSession 返回结果
                 this.putStatus("opening", () => {
                     this.socketUrl = session.data.webSocketUrl
@@ -505,7 +515,7 @@ export default class AxtSession extends React.Component<AxtSessionProps, AxtSess
         })
 
         const type = this.instanceId.startsWith("mi-") ? "managed-instances" : "instances"
-        const info = `/api/ecs/regions/${this.regionId}/${type}/${this.instanceId}`
+        const info = `/api/${this.productId}/regions/${this.regionId}/${type}/${this.instanceId}`
         this.terminal.write(`[-] 正在查询实例[${this.instanceId}]的信息与状态...\r\n`)
         axios.get(info).then(detail => { // 查询实例信息，TODO：检查实例的云助手在线状态
             if (detail.data.instances.length == 0) {

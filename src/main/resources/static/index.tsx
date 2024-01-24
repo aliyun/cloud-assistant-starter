@@ -4,8 +4,9 @@ import {createBrowserRouter, RouterProvider,} from "react-router-dom";
 import Primary from "./components/Primary";
 import EcsInstances from "./components/resource/EcsInstances";
 import AmiInstances from "./components/resource/AmiInstances";
-import AxtSession from "./components/session/AxtSession";
+import SwasInstances from "./components/resource/SwasInstances";
 import TaskManager from "./components/resource/TaskManager";
+import AxtSession from "./components/session/AxtSession";
 
 const router = createBrowserRouter([
     {
@@ -24,6 +25,10 @@ const router = createBrowserRouter([
             {
                 path: "ami",
                 element: <AmiInstances/>
+            },
+            {
+                path: "swas",
+                element: <SwasInstances/>
             },
             {
                 path: "task",

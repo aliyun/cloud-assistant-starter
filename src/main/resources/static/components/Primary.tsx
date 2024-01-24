@@ -37,6 +37,10 @@ export default class Primary extends React.Component<{}, PrimaryState> {
                                 label: <Link to="ami">托管实例</Link>
                             },
                             {
+                                key: "/swas",
+                                label: <Link to="swas">轻量主机</Link>
+                            },
+                            {
                                 key: "/task",
                                 label: <Link to="task">运维记录</Link>
                             }
