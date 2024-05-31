@@ -213,6 +213,7 @@ public class CloudAssistant {
      *
      * @param regionId - 任务所在地域
      * @param invokeId - 任务的唯一ID
+     * @param timeout  - 等待的超时时间，推荐使用：命令Timeout + min(1分钟，命令Timeout）+ 10 秒
      * @return - 任务的执行结果
      * @throws InterruptedException
      */
@@ -220,7 +221,7 @@ public class CloudAssistant {
         return this.waitForTaskStatus(regionId, invokeId, timeout, invocation -> isFinished(invocation.getInvocationStatus()));
     }
 
-    public Invocation waitForTaskStatus(String regionId, String invokeId, int timeout, Predicate<Invocation> predicate) throws InterruptedException {
+    private Invocation waitForTaskStatus(String regionId, String invokeId, int timeout, Predicate<Invocation> predicate) throws InterruptedException {
         AtomicReference<Invocation> result = new AtomicReference<>();
         final CountDownLatch countDownLatch = new CountDownLatch(1);
         this.scheduleTaskQuery(regionId, invokeId, invocation -> {
@@ -241,7 +242,7 @@ public class CloudAssistant {
     }
 
     /**
-     * 同步等待云助手任务执行完成，并执行回调程序。使用异步等待与回调，不会阻止调用方的当前工作线程。
+     * 异步等待云助手任务执行完成，并执行回调程序。使用异步等待与回调时，不会阻止调用方的当前工作线程。
      *
      * @param regionId - 任务所在地域
      * @param invokeId - 任务的唯一ID
@@ -272,7 +273,8 @@ public class CloudAssistant {
     }
 
     /**
-     * 一个命令调用的状态查询任务，
+     * 一个命令调用的状态查询任务。该查询将自动根据命令Timeout时长，选择较适当的查询间隔。
+     * 该查询间隔的选择，即能减少不必要的查询请求数，也能在任务完成后较早获取结果。
      */
     public class TaskQuery implements Runnable {
         private final DescribeInvocationsRequest request;
